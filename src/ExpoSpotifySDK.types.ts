@@ -15,6 +15,28 @@ export interface SpotifyConfig {
 //   responseType: "token" | "code";
 // }
 
+export interface PlayerState {
+  name: string;
+  uri: string;
+  duration: number;
+  isPaused: boolean;
+  playbackPosition: number;
+  playbackSpeed: number;
+  artist?: {
+    name: string;
+    uri: string;
+  };
+  album?: {
+    name: string;
+    uri: string;
+  };
+}
+
+export interface ImageSize {
+  width: number;
+  height: number;
+}
+
 export type SpotifyScope =
   | "ugc-image-upload"
   | "user-read-playback-state"
