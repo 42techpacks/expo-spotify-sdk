@@ -1,13 +1,13 @@
 import React from "react";
 import {
+  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   View,
-  Text,
-  ActivityIndicator,
 } from "react-native";
-import { useSpotifyPlayerState } from "../hooks/useSpotifyPlayerState";
+
 import { useSpotifyAppRemote } from "../hooks/useSpotifyAppRemote";
+import { useSpotifyPlayerState } from "../hooks/useSpotifyPlayerState";
 
 interface PlayPauseButtonProps {
   size?: number;

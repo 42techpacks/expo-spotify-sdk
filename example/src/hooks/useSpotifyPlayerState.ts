@@ -1,5 +1,6 @@
 import { AppRemote } from "expo-spotify-sdk";
 import { useEffect, useState } from "react";
+
 import { PlayerState } from "../../../src/ExpoSpotifySDK.types";
 
 export function useSpotifyPlayerState() {
