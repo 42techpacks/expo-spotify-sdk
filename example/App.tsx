@@ -1,6 +1,6 @@
 import { isAvailable } from "expo-spotify-sdk";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View, Button } from "react-native";
 
 import { useSpotifyAuthentication } from "./src/hooks/useSpotifyAuthentication";
 
@@ -44,9 +44,38 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text onPress={handleAuthenticatePress}>Authenticate Me</Text>
-      <Text>Spotify app is installed: {isAvailable() ? "yes" : "no"}</Text>
-      <Text>Auth Token: {authToken}</Text>
+      <Text style={styles.title}>Spotify SDK Example</Text>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Authentication</Text>
+        <Button title="Authenticate" onPress={handleAuthenticatePress} />
+        <Text>Spotify app is installed: {isAvailable() ? "yes" : "no"}</Text>
+        <Text>Auth Token: {authToken.substring(0, 10)}...</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>App Remote</Text>
+        <Button
+          title="Connect App Remote"
+          // onPress={handleConnectAppRemotePress}
+          // disabled={isConnected}
+        />
+        <Button
+          title="Disconnect App Remote"
+          // onPress={handleDisconnectAppRemotePress}
+          // disabled={!isConnected}
+        />
+        <Button
+          title="Authorize and Play URI"
+          // onPress={handleAuthorizeAndPlayURIPress}
+        />
+        <Text>Spotify app is installed: {isAvailable() ? "yes" : "no"}</Text>
+        {/* <Text>App Remote connected: {isConnected ? "yes" : "no"}</Text> */}
+        <Text>App Remote connected: "undone" </Text>
+        {/* {connectionError && (
+          <Text style={styles.error}>Error: {connectionError}</Text>
+        )} */}
+      </View>
     </View>
   );
 }
@@ -57,5 +86,27 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  section: {
+    width: "100%",
+    marginBottom: 20,
+    padding: 15,
+    borderRadius: 8,
+    backgroundColor: "#f5f5f5",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  error: {
+    color: "red",
+    marginTop: 10,
   },
 });
