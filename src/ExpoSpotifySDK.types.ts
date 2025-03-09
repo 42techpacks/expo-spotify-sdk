@@ -11,6 +11,26 @@ export interface SpotifyConfig {
   tokenRefreshURL?: string;
 }
 
+export interface AppRemoteConnectionConfig {
+  accessToken: string;
+}
+
+export interface AppRemoteConnectionResult {
+  connected: boolean;
+}
+
+export interface AppRemoteDisconnectionResult {
+  disconnected: boolean;
+}
+
+export interface AuthorizeAndPlayURIOptions {
+  asRadio?: boolean;
+}
+
+export interface AuthorizeAndPlayURIResult {
+  success: boolean;
+}
+
 // export interface AndroidSpotifyConfig extends SpotifyConfig {
 //   responseType: "token" | "code";
 // }
@@ -56,3 +76,19 @@ export type SpotifyScope =
   | "user-library-read"
   | "user-read-email"
   | "user-read-private";
+
+export interface AppRemoteConnectedEvent {
+  connected: boolean;
+}
+
+export interface AppRemoteConnectionFailureEvent {
+  error: string;
+}
+
+export interface AppRemoteDisconnectedEvent {
+  error?: string;
+}
+
+export interface AccessTokenReceivedEvent {
+  accessToken: string;
+}

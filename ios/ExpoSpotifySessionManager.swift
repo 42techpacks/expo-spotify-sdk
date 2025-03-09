@@ -29,6 +29,7 @@ final class ExpoSpotifySessionManager: NSObject, SPTAppRemoteDelegate, SPTAppRem
         {
             return nil
         }
+      log.info(clientID, host, scheme)
 
         return ExpoSpotifyConfiguration(clientID: clientID, host: host, scheme: scheme)
     }

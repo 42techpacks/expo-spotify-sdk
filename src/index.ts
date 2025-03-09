@@ -1,8 +1,34 @@
-import { SpotifyConfig, SpotifySession, PlayerState, ImageSize } from "./ExpoSpotifySDK.types";
+import { EventEmitter, Subscription } from "expo-modules-core";
+
+import {
+  SpotifyConfig,
+  SpotifySession,
+  AppRemoteConnectionConfig,
+  AppRemoteConnectionResult,
+  AppRemoteDisconnectionResult,
+  AppRemoteConnectedEvent,
+  AppRemoteConnectionFailureEvent,
+  AppRemoteDisconnectedEvent,
+  AuthorizeAndPlayURIOptions,
+  AuthorizeAndPlayURIResult,
+  AccessTokenReceivedEvent,
+} from "./ExpoSpotifySDK.types";
 import ExpoSpotifySDKModule from "./ExpoSpotifySDKModule";
+import { initializeURLHandler } from "./ExpoSpotifyURLHandler";
+
+// Event emitter for App Remote events
+const emitter = new EventEmitter(ExpoSpotifySDKModule);
 
 function isAvailable(): boolean {
   return ExpoSpotifySDKModule.isAvailable();
+}
+
+function isSpotifyAppInstalled(): boolean {
+  return ExpoSpotifySDKModule.isSpotifyAppInstalled();
+}
+
+function isAppRemoteConnected(): boolean {
+  return ExpoSpotifySDKModule.isAppRemoteConnected();
 }
 
 function authenticateAsync(config: SpotifyConfig): Promise<SpotifySession> {
@@ -13,71 +39,99 @@ function authenticateAsync(config: SpotifyConfig): Promise<SpotifySession> {
   return ExpoSpotifySDKModule.authenticateAsync(config);
 }
 
-// App Remote functions
-async function connectToAppRemote(accessToken: string): Promise<boolean> {
-  return ExpoSpotifySDKModule.connectToAppRemote(accessToken);
+function connectAppRemoteAsync(
+  config: AppRemoteConnectionConfig,
+): Promise<AppRemoteConnectionResult> {
+  if (!config.accessToken) {
+    throw new Error("accessToken is required");
+  }
+
+  return ExpoSpotifySDKModule.connectAppRemoteAsync(config);
 }
 
-async function disconnectFromAppRemote(): Promise<boolean> {
-  return ExpoSpotifySDKModule.disconnectFromAppRemote();
+function disconnectAppRemoteAsync(): Promise<AppRemoteDisconnectionResult> {
+  return ExpoSpotifySDKModule.disconnectAppRemoteAsync();
 }
 
-// Playback control functions
-async function play(uri: string): Promise<boolean> {
-  return ExpoSpotifySDKModule.play(uri);
+/**
+ * Authorizes with Spotify and immediately starts playback of the provided URI
+ * @param uri The Spotify URI to play
+ * @param options Optional parameters including asRadio
+ * @returns Promise that resolves with a success boolean
+ */
+function authorizeAndPlayURIAsync(
+  uri: string,
+  options?: AuthorizeAndPlayURIOptions,
+): Promise<AuthorizeAndPlayURIResult> {
+  if (!uri) {
+    throw new Error("uri is required");
+  }
+
+  return ExpoSpotifySDKModule.authorizeAndPlayURIAsync({
+    uri,
+    asRadio: options?.asRadio || false,
+  });
 }
 
-async function resume(): Promise<boolean> {
-  return ExpoSpotifySDKModule.resume();
+/**
+ * Handles a URL received from Spotify after authorization
+ * @param url The URL to handle
+ * @returns Boolean indicating if the URL was successfully handled
+ */
+function handleURL(url: string): boolean {
+  return ExpoSpotifySDKModule.handleURL(url);
 }
 
-async function pause(): Promise<boolean> {
-  return ExpoSpotifySDKModule.pause();
+// Event listeners
+function addAppRemoteConnectedListener(
+  listener: (event: AppRemoteConnectedEvent) => void,
+): Subscription {
+  return emitter.addListener("onAppRemoteConnected", listener);
 }
 
-async function skipToNext(): Promise<boolean> {
-  return ExpoSpotifySDKModule.skipToNext();
+function addAppRemoteConnectionFailureListener(
+  listener: (event: AppRemoteConnectionFailureEvent) => void,
+): Subscription {
+  return emitter.addListener("onAppRemoteConnectionFailure", listener);
 }
 
-async function skipToPrevious(): Promise<boolean> {
-  return ExpoSpotifySDKModule.skipToPrevious();
+function addAppRemoteDisconnectedListener(
+  listener: (event: AppRemoteDisconnectedEvent) => void,
+): Subscription {
+  return emitter.addListener("onAppRemoteDisconnected", listener);
 }
 
-// Player state functions
-async function getPlayerState(): Promise<PlayerState> {
-  return ExpoSpotifySDKModule.getPlayerState();
-}
-
-async function getAlbumArt(imageSize: ImageSize): Promise<string> {
-  return ExpoSpotifySDKModule.getAlbumArt(imageSize);
-}
-
-async function subscribeToPlayerState(): Promise<boolean> {
-  return ExpoSpotifySDKModule.subscribeToPlayerState();
-}
-
-// Event listener for player state changes
-function addPlayerStateListener(callback: (playerState: PlayerState) => void): () => void {
-  const subscription = ExpoSpotifySDKModule.addListener('onPlayerStateChanged', callback);
-  return () => subscription.remove();
+/**
+ * Adds a listener for when an access token is received from Spotify
+ * @param listener The function to call when an access token is received
+ * @returns A subscription that can be used to remove the listener
+ */
+function addAccessTokenReceivedListener(
+  listener: (event: AccessTokenReceivedEvent) => void,
+): Subscription {
+  return emitter.addListener("onAccessTokenReceived", listener);
 }
 
 const Authenticate = {
   authenticateAsync,
 };
 
-const Player = {
-  connectToAppRemote,
-  disconnectFromAppRemote,
-  play,
-  resume,
-  pause,
-  skipToNext,
-  skipToPrevious,
-  getPlayerState,
-  getAlbumArt,
-  subscribeToPlayerState,
-  addPlayerStateListener,
+const AppRemote = {
+  connectAppRemoteAsync,
+  disconnectAppRemoteAsync,
+  authorizeAndPlayURIAsync,
+  handleURL,
+  isAppRemoteConnected,
+  addAppRemoteConnectedListener,
+  addAppRemoteConnectionFailureListener,
+  addAppRemoteDisconnectedListener,
+  addAccessTokenReceivedListener,
 };
 
-export { isAvailable, Authenticate, Player };
+export {
+  isAvailable,
+  isSpotifyAppInstalled,
+  Authenticate,
+  AppRemote,
+  initializeURLHandler,
+};

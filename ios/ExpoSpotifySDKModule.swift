@@ -6,32 +6,122 @@ public class ExpoSpotifySDKModule: Module {
     public func definition() -> ModuleDefinition {
 
         let spotifySession = ExpoSpotifySessionManager.shared
+        let spotifyAppRemote = ExpoSpotifyAppRemoteManager.shared
+
+        // Set the module reference in our managers
+//      spotifySession as! ExpoSpotifySessionManager.module = self
+//      spotifyAppRemote as! AnyDefinition.module = self
 
         Name("ExpoSpotifySDK")
 
+        // Events for App Remote connection status
+        Events("onAppRemoteConnected", "onAppRemoteConnectionFailure", "onAppRemoteDisconnected", "onAccessTokenReceived")
+
+        OnCreate {
+            NSLog("ExpoSpotifySDKModule OnCreate")
+            // Register for URL events from Expo
+            // let eventEmitter = self.appContext?.eventEmitter
+            // eventEmitter?.addListener(self, eventName: "expo-spotify-sdk-handle-url") { (body: [AnyHashable: Any]?) in
+            //     guard let urlString = body?["url"] as? String,
+            //           let url = URL(string: urlString) else {
+            //         return
+            //     }
+
+            //     self.handleURL(url: url)
+            // }
+        }
+
+        Function("handleURL") { (urlString: String) in
+            guard let url = URL(string: urlString) else {
+                return false
+            }
+
+            return self.handleURL(url: url)
+        }
+
         Function("isAvailable") {
-            return spotifySession.spotifyAppInstalled()
+          return spotifySession.spotifyAppInstalled()
+        }
+
+        //TODO: This is redundant
+        Function("isSpotifyAppInstalled") {
+          return spotifyAppRemote.spotifyAppInstalled()
+        }
+
+        Function("isAppRemoteConnected") {
+          return spotifyAppRemote.isConnected
         }
 
         AsyncFunction("authenticateAsync") { (config: [String: Any], promise: Promise) in
-            guard let scopes = config["scopes"] as? [String] else {
-                promise.reject("INVALID_CONFIG", "Invalid SpotifyConfig object")
-                return
-            }
+          log.info("authenticate async called")
+          guard let scopes = config["scopes"] as? [String] else {
+            promise.reject("INVALID_CONFIG", "Invalid SpotifyConfig object")
+            return
+          }
 
-            let tokenSwapURL = config["tokenSwapURL"] as? String
-            let tokenRefreshURL = config["tokenRefreshURL"] as? String
+          let tokenSwapURL = config["tokenSwapURL"] as? String
+          let tokenRefreshURL = config["tokenRefreshURL"] as? String
 
-            spotifySession.authenticate(scopes: scopes, tokenSwapURL: tokenSwapURL, tokenRefreshURL: tokenRefreshURL).done { session in
-                promise.resolve([
-                    "accessToken": session.accessToken,
-                    "refreshToken": session.refreshToken,
-                    "expirationDate": Int(session.expirationDate.timeIntervalSince1970 * 1000),
-                    "scopes": SPTScopeSerializer.serializeScopes(session.scope)
-                ])
-            }.catch { error in
-                promise.reject(error)
-            }
+          spotifySession.authenticate(scopes: scopes, tokenSwapURL: tokenSwapURL, tokenRefreshURL: tokenRefreshURL).done { session in
+            promise.resolve([
+              "accessToken": session.accessToken,
+              "refreshToken": session.refreshToken,
+              "expirationDate": Int(session.expirationDate.timeIntervalSince1970 * 1000),
+              "scopes": SPTScopeSerializer.serializeScopes(session.scope)
+            ])
+          }.catch { error in
+            log.error(error)
+            promise.reject(error)
+          }
+        }
+
+        AsyncFunction("connectAppRemoteAsync") { (config: [String: Any], promise: Promise) in
+          log.info("connect app remote async called")
+          guard let accessToken = config["accessToken"] as? String else {
+            promise.reject("MISSING_ACCESS_TOKEN", "Access token is required")
+            return
+          }
+
+          spotifyAppRemote.connect(accessToken: accessToken).done { connected in
+            promise.resolve([
+              "connected": connected
+            ])
+          }.catch { error in
+            log.error(error)
+            promise.reject(error)
+          }
+        }
+
+        AsyncFunction("disconnectAppRemoteAsync") { (promise: Promise) in
+          log.info("disconnect app remote async called")
+
+          spotifyAppRemote.disconnect().done { success in
+            promise.resolve([
+              "disconnected": success
+            ])
+          }.catch { error in
+            log.error(error)
+            promise.reject(error)
+          }
+        }
+
+        AsyncFunction("authorizeAndPlayURIAsync") { (config: [String: Any], promise: Promise) in
+          log.info("authorize and play URI async called")
+          guard let uri = config["uri"] as? String else {
+            promise.reject("MISSING_URI", "URI is required")
+            return
+          }
+
+          let asRadio = config["asRadio"] as? Bool ?? false
+
+          spotifyAppRemote.authorizeAndPlayURI(uri: uri, asRadio: asRadio).done { success in
+            promise.resolve([
+              "success": success
+            ])
+          }.catch { error in
+            log.error(error)
+            promise.reject(error)
+          }
         }
 
         // Add App Remote functionality
@@ -124,5 +214,35 @@ public class ExpoSpotifySDKModule: Module {
 
         // Event emitter for player state changes
         EventEmitter("onPlayerStateChanged")
+    }
+
+    // MARK: - URL Handling
+
+    func handleURL(url: URL) -> Bool {
+        let spotifyAppRemote = ExpoSpotifyAppRemoteManager.shared
+
+        guard let appRemote = spotifyAppRemote.appRemote else {
+            return false
+        }
+
+        let parameters = appRemote.authorizationParameters(from: url)
+
+        if let accessToken = parameters?[SPTAppRemoteAccessTokenKey] {
+            // Store the access token in the app remote connection parameters
+            spotifyAppRemote.accessToken = accessToken
+
+            // Notify JS side about the received access token
+            sendEvent("onAccessTokenReceived", [
+                "accessToken": accessToken
+            ])
+
+            return true
+        } else if let errorDescription = parameters?[SPTAppRemoteErrorDescriptionKey] {
+            // Handle error
+            NSLog("Authorization error: \(errorDescription)")
+            return false
+        }
+
+        return false
     }
 }

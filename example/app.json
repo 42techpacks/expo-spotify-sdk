@@ -33,7 +33,7 @@
       ["../app.plugin.js", {
         "host": "authenticate",
         "scheme": "expo-spotify-sdk-example",
-        "clientID": "your-client-id"
+        "clientID": "3c67fc60e59e4cb3b5dca98ec0c08cb6"
       }]
     ]
   }

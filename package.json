@@ -50,5 +50,8 @@
     "expo": "*",
     "react": "*",
     "react-native": "*"
+  },
+  "dependencies": {
+    "expo-linking": "~6.3.1"
   }
 }
