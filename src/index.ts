@@ -15,6 +15,8 @@ import {
   PlayerStateResult,
   PlayerStateSubscriptionResult,
   PlayerStateChangedEvent,
+  AddToQueueConfig,
+  AddToQueueResult,
 } from "./ExpoSpotifySDK.types";
 import ExpoSpotifySDKModule from "./ExpoSpotifySDKModule";
 
@@ -121,6 +123,19 @@ function skipToPreviousAsync(): Promise<SkipTrackResult> {
   return ExpoSpotifySDKModule.skipToPreviousAsync();
 }
 
+/**
+ * Adds a track to the playback queue
+ * @param config Object containing the Spotify URI to add to the queue
+ * @returns Promise that resolves with a success boolean
+ */
+function addToQueueAsync(config: AddToQueueConfig): Promise<AddToQueueResult> {
+  if (!config.uri) {
+    throw new Error("uri is required");
+  }
+
+  return ExpoSpotifySDKModule.addToQueueAsync(config);
+}
+
 // Event listeners
 const emitter = new EventEmitter(ExpoSpotifySDKModule);
 
@@ -159,6 +174,7 @@ const AppRemote = {
   pauseAsync,
   skipToNextAsync,
   skipToPreviousAsync,
+  addToQueueAsync,
   connectAppRemoteAsync,
   disconnectAppRemoteAsync,
   addAppRemoteConnectedListener,

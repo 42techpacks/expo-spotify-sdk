@@ -47,6 +47,14 @@ export interface SkipTrackResult {
   success: boolean;
 }
 
+export interface AddToQueueConfig {
+  uri: string;
+}
+
+export interface AddToQueueResult {
+  success: boolean;
+}
+
 export interface AppRemoteConnectionConfig {
   accessToken: string;
 }

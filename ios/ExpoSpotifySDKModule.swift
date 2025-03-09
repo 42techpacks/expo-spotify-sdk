@@ -257,5 +257,30 @@ public class ExpoSpotifySDKModule: Module {
              promise.reject(error)
            }
          }
+
+         AsyncFunction("addToQueueAsync") { (config: [String: Any], promise: Promise) in
+           log.info("add to queue async called")
+
+           guard let uri = config["uri"] as? String else {
+             promise.reject("MISSING_URI", "URI is required")
+             return
+           }
+
+           guard let appRemote = spotifyAppRemote.appRemote else {
+             promise.reject("NOT_CONNECTED", "Spotify App Remote is not connected")
+             return
+           }
+
+           appRemote.playerAPI?.enqueueTrackUri(uri, callback: { (_, error) in
+             if let error = error {
+               log.error(error)
+               promise.reject(error)
+             } else {
+               promise.resolve([
+                 "success": true
+               ])
+             }
+           })
+         }
     }
 }

@@ -45,6 +45,7 @@ export function useSpotifyAppRemote() {
     pauseAsync: AppRemote.pauseAsync,
     skipToNextAsync: AppRemote.skipToNextAsync,
     skipToPreviousAsync: AppRemote.skipToPreviousAsync,
+    addToQueueAsync: AppRemote.addToQueueAsync,
     authorizeAndPlayURI: AppRemote.authorizeAndPlayURIAsync,
     connectAppRemote: AppRemote.connectAppRemoteAsync,
     disconnectAppRemote: AppRemote.disconnectAppRemoteAsync,
