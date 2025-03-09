@@ -221,5 +221,41 @@ public class ExpoSpotifySDKModule: Module {
              promise.reject(error)
            }
          }
+
+         AsyncFunction("skipToNextAsync") { (promise: Promise) in
+           log.info("skip to next async called")
+
+           guard let appRemote = spotifyAppRemote.appRemote else {
+             promise.reject("NOT_CONNECTED", "Spotify App Remote is not connected")
+             return
+           }
+
+           spotifyAppRemote.skipToNext().done { success in
+             promise.resolve([
+               "success": success
+             ])
+           }.catch { error in
+             log.error(error)
+             promise.reject(error)
+           }
+         }
+
+         AsyncFunction("skipToPreviousAsync") { (promise: Promise) in
+           log.info("skip to previous async called")
+
+           guard let appRemote = spotifyAppRemote.appRemote else {
+             promise.reject("NOT_CONNECTED", "Spotify App Remote is not connected")
+             return
+           }
+
+           spotifyAppRemote.skipToPrevious().done { success in
+             promise.resolve([
+               "success": success
+             ])
+           }.catch { error in
+             log.error(error)
+             promise.reject(error)
+           }
+         }
     }
 }

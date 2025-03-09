@@ -43,6 +43,10 @@ export interface PlaybackResult {
   success: boolean;
 }
 
+export interface SkipTrackResult {
+  success: boolean;
+}
+
 export interface AppRemoteConnectionConfig {
   accessToken: string;
 }

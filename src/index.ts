@@ -5,13 +5,13 @@ import {
   SpotifySession,
   AuthorizeAndPlayURIResult,
   PlaybackResult,
+  SkipTrackResult,
   AppRemoteConnectionConfig,
   AppRemoteConnectionResult,
   AppRemoteDisconnectionResult,
   AppRemoteConnectionFailureEvent,
   AppRemoteDisconnectedEvent,
   AppRemoteConnectedEvent,
-  PlayerState,
   PlayerStateResult,
   PlayerStateSubscriptionResult,
   PlayerStateChangedEvent,
@@ -105,6 +105,22 @@ function unsubscribeFromPlayerStateAsync(): Promise<PlayerStateSubscriptionResul
   return ExpoSpotifySDKModule.unsubscribeFromPlayerStateAsync();
 }
 
+/**
+ * Skips to the next track in the current context
+ * @returns Promise that resolves with a success boolean
+ */
+function skipToNextAsync(): Promise<SkipTrackResult> {
+  return ExpoSpotifySDKModule.skipToNextAsync();
+}
+
+/**
+ * Skips to the previous track in the current context
+ * @returns Promise that resolves with a success boolean
+ */
+function skipToPreviousAsync(): Promise<SkipTrackResult> {
+  return ExpoSpotifySDKModule.skipToPreviousAsync();
+}
+
 // Event listeners
 const emitter = new EventEmitter(ExpoSpotifySDKModule);
 
@@ -141,6 +157,8 @@ const AppRemote = {
   isAppRemoteConnected,
   playAsync,
   pauseAsync,
+  skipToNextAsync,
+  skipToPreviousAsync,
   connectAppRemoteAsync,
   disconnectAppRemoteAsync,
   addAppRemoteConnectedListener,

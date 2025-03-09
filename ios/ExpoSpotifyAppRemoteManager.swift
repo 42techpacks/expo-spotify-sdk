@@ -175,6 +175,44 @@ final class ExpoSpotifyAppRemoteManager: NSObject {
             }
         }
     }
+
+    func skipToNext() -> PromiseKit.Promise<Bool> {
+        return Promise { seal in
+            guard let appRemote = self.appRemote, appRemote.isConnected else {
+                seal.reject(AppRemoteError.notInitialized)
+                return
+            }
+
+            appRemote.playerAPI?.skip(toNext: { (_, error) in
+                if let error = error {
+                    NSLog("Failed to skip to next track: \(error.localizedDescription)")
+                    seal.reject(error)
+                    return
+                }
+
+                seal.fulfill(true)
+            })
+        }
+    }
+
+    func skipToPrevious() -> PromiseKit.Promise<Bool> {
+        return Promise { seal in
+            guard let appRemote = self.appRemote, appRemote.isConnected else {
+                seal.reject(AppRemoteError.notInitialized)
+                return
+            }
+
+            appRemote.playerAPI?.skip(toPrevious: { (_, error) in
+                if let error = error {
+                    NSLog("Failed to skip to previous track: \(error.localizedDescription)")
+                    seal.reject(error)
+                    return
+                }
+
+                seal.fulfill(true)
+            })
+        }
+    }
 }
 
 // MARK: - SPTAppRemoteDelegate

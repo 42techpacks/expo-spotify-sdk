@@ -1,6 +1,6 @@
 import { isAvailable } from "expo-spotify-sdk";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, View, Button } from "react-native";
+import { Alert, StyleSheet, Text, View, Button, TouchableOpacity } from "react-native";
 
 import { useSpotifyAppRemote } from "./src/hooks/useSpotifyAppRemote";
 import { useSpotifyAuthentication } from "./src/hooks/useSpotifyAuthentication";
@@ -15,6 +15,8 @@ export default function App() {
     authorizeAndPlayURI,
     connectAppRemote,
     disconnectAppRemote,
+    skipToNextAsync,
+    skipToPreviousAsync,
   } = useSpotifyAppRemote();
   const { playerState } = useSpotifyPlayerState();
 
@@ -116,6 +118,46 @@ export default function App() {
     }
   }
 
+  async function handleSkipToNextPress() {
+    try {
+      if (!isConnected) {
+        Alert.alert("Not Connected", "Please connect to Spotify App Remote first");
+        return;
+      }
+
+      const result = await skipToNextAsync();
+      console.log("Skip to next result:", result);
+
+      if (!result.success) {
+        Alert.alert("Error", "Failed to skip to next track");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Skip Error", error.message);
+      }
+    }
+  }
+
+  async function handleSkipToPreviousPress() {
+    try {
+      if (!isConnected) {
+        Alert.alert("Not Connected", "Please connect to Spotify App Remote first");
+        return;
+      }
+
+      const result = await skipToPreviousAsync();
+      console.log("Skip to previous result:", result);
+
+      if (!result.success) {
+        Alert.alert("Error", "Failed to skip to previous track");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Skip Error", error.message);
+      }
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Spotify SDK Example</Text>
@@ -149,7 +191,23 @@ export default function App() {
               {playerState.track.name} - {playerState.track.artist.name}
             </Text>
           )}
-          <PlayPauseButton size={60} />
+          <View style={styles.playbackControls}>
+            <TouchableOpacity
+              style={styles.skipButton}
+              onPress={handleSkipToPreviousPress}
+              disabled={!isConnected}
+            >
+              <Text style={styles.skipButtonText}>⏮️</Text>
+            </TouchableOpacity>
+            <PlayPauseButton size={60} />
+            <TouchableOpacity
+              style={styles.skipButton}
+              onPress={handleSkipToNextPress}
+              disabled={!isConnected}
+            >
+              <Text style={styles.skipButtonText}>⏭️</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>
@@ -198,5 +256,21 @@ const styles = StyleSheet.create({
   error: {
     color: "red",
     marginTop: 10,
+  },
+  playbackControls: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
+  skipButton: {
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 10,
+  },
+  skipButtonText: {
+    fontSize: 24,
   },
 });

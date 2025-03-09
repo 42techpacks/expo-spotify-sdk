@@ -43,6 +43,8 @@ export function useSpotifyAppRemote() {
     connectionError,
     playAsync: AppRemote.playAsync,
     pauseAsync: AppRemote.pauseAsync,
+    skipToNextAsync: AppRemote.skipToNextAsync,
+    skipToPreviousAsync: AppRemote.skipToPreviousAsync,
     authorizeAndPlayURI: AppRemote.authorizeAndPlayURIAsync,
     connectAppRemote: AppRemote.connectAppRemoteAsync,
     disconnectAppRemote: AppRemote.disconnectAppRemoteAsync,
