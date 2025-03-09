@@ -38,3 +38,19 @@ export type SpotifyScope =
 export interface AuthorizeAndPlayURIResult {
   success: boolean;
 }
+
+export interface PlaybackResult {
+  success: boolean;
+}
+
+export interface AppRemoteConnectionConfig {
+  accessToken: string;
+}
+
+export interface AppRemoteConnectionResult {
+  connected: boolean;
+}
+
+export interface AppRemoteDisconnectionResult {
+  disconnected: boolean;
+}

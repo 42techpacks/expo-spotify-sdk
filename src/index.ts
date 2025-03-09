@@ -2,6 +2,11 @@ import {
   SpotifyConfig,
   SpotifySession,
   AuthorizeAndPlayURIResult,
+  PlaybackResult,
+  AppRemoteConnectionConfig,
+  AppRemoteConnectionResult,
+  AppRemoteDisconnectionResult,
+
 } from "./ExpoSpotifySDK.types";
 import ExpoSpotifySDKModule from "./ExpoSpotifySDKModule";
 
@@ -38,6 +43,36 @@ function isAppRemoteConnected(): boolean {
   return ExpoSpotifySDKModule.isAppRemoteConnected();
 }
 
+function connectAppRemoteAsync(
+  config: AppRemoteConnectionConfig,
+): Promise<AppRemoteConnectionResult> {
+  if (!config.accessToken) {
+    throw new Error("accessToken is required");
+  }
+
+  return ExpoSpotifySDKModule.connectAppRemoteAsync(config);
+}
+
+function disconnectAppRemoteAsync(): Promise<AppRemoteDisconnectionResult> {
+  return ExpoSpotifySDKModule.disconnectAppRemoteAsync();
+}
+
+/**
+ * Starts or resumes playback on the active device
+ * @returns Promise that resolves with a success boolean
+ */
+function playAsync(): Promise<PlaybackResult> {
+  return ExpoSpotifySDKModule.playAsync();
+}
+
+/**
+ * Pauses playback on the active device
+ * @returns Promise that resolves with a success boolean
+ */
+function pauseAsync(): Promise<PlaybackResult> {
+  return ExpoSpotifySDKModule.pauseAsync();
+}
+
 const Authenticate = {
   authenticateAsync,
 };
@@ -45,6 +80,10 @@ const Authenticate = {
 const AppRemote = {
   authorizeAndPlayURIAsync,
   isAppRemoteConnected,
+  playAsync,
+  pauseAsync,
+  connectAppRemoteAsync,
+  disconnectAppRemoteAsync,
 };
 
 export { isAvailable, Authenticate, AppRemote };

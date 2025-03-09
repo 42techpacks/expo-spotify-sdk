@@ -56,5 +56,78 @@ public class ExpoSpotifySDKModule: Module {
              promise.reject(error)
            }
          }
+
+        AsyncFunction("connectAppRemoteAsync") { (config: [String: Any], promise: Promise) in
+          log.info("connect app remote async called")
+          guard let accessToken = config["accessToken"] as? String else {
+            promise.reject("MISSING_ACCESS_TOKEN", "Access token is required")
+            return
+          }
+
+          spotifyAppRemote.connect(accessToken: accessToken).done { connected in
+            promise.resolve([
+              "connected": connected
+            ])
+          }.catch { error in
+            log.error(error)
+            promise.reject(error)
+          }
+        }
+
+        AsyncFunction("disconnectAppRemoteAsync") { (promise: Promise) in
+          log.info("disconnect app remote async called")
+
+          spotifyAppRemote.disconnect().done { success in
+            promise.resolve([
+              "disconnected": success
+            ])
+          }.catch { error in
+            log.error(error)
+            promise.reject(error)
+          }
+        }
+
+
+         AsyncFunction("playAsync") { (promise: Promise) in
+           log.info("play async called")
+
+           guard let appRemote = spotifyAppRemote.appRemote else {
+             log.error("Failed to play: Spotify App Remote is not connected")
+             promise.reject("NOT_CONNECTED", "Spotify App Remote is not connected")
+             return
+           }
+
+           appRemote.playerAPI?.resume({ (_, error) in
+             if let error = error {
+               log.error(error)
+               promise.reject(error)
+             } else {
+               promise.resolve([
+                 "success": true
+               ])
+             }
+           })
+         }
+
+         AsyncFunction("pauseAsync") { (promise: Promise) in
+           log.info("pause async called")
+
+           guard let appRemote = spotifyAppRemote.appRemote else {
+             promise.reject("NOT_CONNECTED", "Spotify App Remote is not connected")
+             return
+           }
+           log.info(appRemote.playerAPI)
+
+           appRemote.playerAPI?.pause({ (_, error) in
+             if let error = error {
+               log.error(error)
+               promise.reject(error)
+             } else {
+               promise.resolve([
+                 "success": true
+               ])
+             }
+           })
+         }
     }
 }

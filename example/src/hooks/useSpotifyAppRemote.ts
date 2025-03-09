@@ -11,6 +11,10 @@ export function useSpotifyAppRemote() {
 
   return {
     isConnected,
+    playAsync: AppRemote.playAsync,
+    pauseAsync: AppRemote.pauseAsync,
     authorizeAndPlayURI: AppRemote.authorizeAndPlayURIAsync,
+    connectAppRemote: AppRemote.connectAppRemoteAsync,
+    disconnectAppRemote: AppRemote.disconnectAppRemoteAsync,
   };
 }
