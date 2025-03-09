@@ -1,0 +1,99 @@
+import React from "react";
+import { StyleSheet, TouchableOpacity, View, Text, ActivityIndicator } from "react-native";
+import { useSpotifyPlayerState } from "../hooks/useSpotifyPlayerState";
+import { useSpotifyAppRemote } from "../hooks/useSpotifyAppRemote";
+
+interface PlayPauseButtonProps {
+  size?: number;
+  color?: string;
+  style?: any;
+}
+
+export function PlayPauseButton({
+  size = 50,
+  color = "#1DB954",
+  style
+}: PlayPauseButtonProps) {
+  const { isConnected } = useSpotifyAppRemote();
+  const { playerState, isPlaying, togglePlayPause } = useSpotifyPlayerState();
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handlePress = async () => {
+    setIsLoading(true);
+    try {
+      await togglePlayPause();
+    } catch (error) {
+      console.error("Error toggling playback:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Calculate styles based on props
+  const buttonSize = { width: size, height: size };
+  const iconSize = size * 0.5;
+
+  // Play icon is a triangle pointing right
+  const renderPlayIcon = () => (
+    <View style={[styles.playIcon, { borderLeftWidth: iconSize, borderTopWidth: iconSize / 2, borderBottomWidth: iconSize / 2 }]} />
+  );
+
+  // Pause icon is two parallel rectangles
+  const renderPauseIcon = () => (
+    <View style={styles.pauseContainer}>
+      <View style={[styles.pauseBar, { width: iconSize / 3, height: iconSize }]} />
+      <View style={[styles.pauseBar, { width: iconSize / 3, height: iconSize }]} />
+    </View>
+  );
+
+  return (
+    <TouchableOpacity
+      style={[styles.button, buttonSize, { backgroundColor: color }, style]}
+      onPress={handlePress}
+      disabled={!isConnected || isLoading}
+    >
+      {isLoading ? (
+        <ActivityIndicator color="#FFFFFF" />
+      ) : isPlaying ? (
+        renderPauseIcon()
+      ) : (
+        renderPlayIcon()
+      )}
+    </TouchableOpacity>
+  );
+}
+
+const styles = StyleSheet.create({
+  button: {
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  playIcon: {
+    width: 0,
+    height: 0,
+    backgroundColor: "transparent",
+    borderStyle: "solid",
+    borderLeftColor: "#FFFFFF",
+    borderTopColor: "transparent",
+    borderBottomColor: "transparent",
+    marginLeft: 5, // Offset to center the triangle
+  },
+  pauseContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    height: "100%",
+    gap: 5,
+  },
+  pauseBar: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 2,
+  },
+});

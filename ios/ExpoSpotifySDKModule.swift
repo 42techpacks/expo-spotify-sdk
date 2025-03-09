@@ -4,6 +4,7 @@ import SpotifyiOS
 let APP_REMOTE_CONNECTED_EVENT_NAME = "onAppRemoteConnected"
 let APP_REMOTE_DISCONNECTED_EVENT_NAME = "onAppRemoteDisconnected"
 let APP_REMOTE_CONNECTION_FAILED_EVENT_NAME = "onAppRemoteConnectionFailure"
+let PLAYER_STATE_CHANGED_EVENT_NAME = "onPlayerStateChanged"
 
 public class ExpoSpotifySDKModule: Module {
 
@@ -23,7 +24,7 @@ public class ExpoSpotifySDKModule: Module {
         }
 
         Name("ExpoSpotifySDK")
-        Events(APP_REMOTE_CONNECTED_EVENT_NAME, APP_REMOTE_DISCONNECTED_EVENT_NAME, APP_REMOTE_CONNECTION_FAILED_EVENT_NAME)
+        Events(APP_REMOTE_CONNECTED_EVENT_NAME, APP_REMOTE_DISCONNECTED_EVENT_NAME, APP_REMOTE_CONNECTION_FAILED_EVENT_NAME, PLAYER_STATE_CHANGED_EVENT_NAME)
 
         Function("isAvailable") {
             return spotifySession.spotifyAppInstalled()
@@ -143,6 +144,82 @@ public class ExpoSpotifySDKModule: Module {
                ])
              }
            })
+         }
+
+         AsyncFunction("getPlayerStateAsync") { (promise: Promise) in
+           log.info("get player state async called")
+
+           guard let appRemote = spotifyAppRemote.appRemote else {
+             promise.reject("NOT_CONNECTED", "Spotify App Remote is not connected")
+             return
+           }
+
+           appRemote.playerAPI?.getPlayerState({ (playerState, error) in
+             if let error = error {
+               log.error(error)
+               promise.reject(error)
+               return
+             }
+
+             guard let playerState = playerState as? SPTAppRemotePlayerState else {
+               promise.reject("PLAYER_STATE_ERROR", "Failed to get player state")
+               return
+             }
+
+             let trackInfo = playerState.track
+             let artistName = trackInfo.artist.name
+
+             let playerStateDict: [String: Any] = [
+               "playerState": [
+                 "isPaused": playerState.isPaused,
+                 "track": [
+                   "name": trackInfo.name,
+                   "uri": trackInfo.uri,
+                   "artist": [
+                     "name": artistName
+                   ]
+                 ]
+               ]
+             ]
+
+             promise.resolve(playerStateDict)
+           })
+         }
+
+         AsyncFunction("subscribeToPlayerStateAsync") { (promise: Promise) in
+           log.info("subscribe to player state async called")
+
+           guard let appRemote = spotifyAppRemote.appRemote else {
+             promise.reject("NOT_CONNECTED", "Spotify App Remote is not connected")
+             return
+           }
+
+           spotifyAppRemote.subscribeToPlayerState().done { success in
+             promise.resolve([
+               "success": success
+             ])
+           }.catch { error in
+             log.error(error)
+             promise.reject(error)
+           }
+         }
+
+         AsyncFunction("unsubscribeFromPlayerStateAsync") { (promise: Promise) in
+           log.info("unsubscribe from player state async called")
+
+           guard let appRemote = spotifyAppRemote.appRemote else {
+             promise.reject("NOT_CONNECTED", "Spotify App Remote is not connected")
+             return
+           }
+
+           spotifyAppRemote.unsubscribeFromPlayerState().done { success in
+             promise.resolve([
+               "success": success
+             ])
+           }.catch { error in
+             log.error(error)
+             promise.reject(error)
+           }
          }
     }
 }

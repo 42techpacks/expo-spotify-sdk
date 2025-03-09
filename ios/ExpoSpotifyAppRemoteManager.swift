@@ -9,11 +9,13 @@ enum AppRemoteError: Error {
     case connectionFailed
     case spotifyAppNotInstalled
     case accessTokenMissing
+    case playerStateSubscriptionFailed
 }
 
 final class ExpoSpotifyAppRemoteManager: NSObject {
     weak var module: ExpoSpotifySDKModule?
     var connectionPromiseSeal: Resolver<Bool>?
+    private var isSubscribedToPlayerState = false
 
     static let shared = ExpoSpotifyAppRemoteManager()
 
@@ -126,6 +128,53 @@ final class ExpoSpotifyAppRemoteManager: NSObject {
             }
         }
     }
+
+    func subscribeToPlayerState() -> PromiseKit.Promise<Bool> {
+        return Promise { seal in
+            guard let appRemote = self.appRemote, appRemote.isConnected else {
+                seal.reject(AppRemoteError.notInitialized)
+                return
+            }
+
+            appRemote.playerAPI?.delegate = self
+
+            appRemote.playerAPI?.subscribe { (_, error) in
+                if let error = error {
+                    NSLog("Failed to subscribe to player state: \(error.localizedDescription)")
+                    seal.reject(AppRemoteError.playerStateSubscriptionFailed)
+                    return
+                }
+
+                self.isSubscribedToPlayerState = true
+                seal.fulfill(true)
+            }
+        }
+    }
+
+    func unsubscribeFromPlayerState() -> PromiseKit.Promise<Bool> {
+        return Promise { seal in
+            guard let appRemote = self.appRemote, appRemote.isConnected else {
+                seal.fulfill(true) // Already disconnected if appRemote is nil or not connected
+                return
+            }
+
+            if !isSubscribedToPlayerState {
+                seal.fulfill(true) // Already unsubscribed
+                return
+            }
+
+            appRemote.playerAPI?.unsubscribe { (_, error) in
+                if let error = error {
+                    NSLog("Failed to unsubscribe from player state: \(error.localizedDescription)")
+                    seal.reject(error)
+                    return
+                }
+
+                self.isSubscribedToPlayerState = false
+                seal.fulfill(true)
+            }
+        }
+    }
 }
 
 // MARK: - SPTAppRemoteDelegate
@@ -161,10 +210,36 @@ extension ExpoSpotifyAppRemoteManager: SPTAppRemoteDelegate {
     public func appRemote(_ appRemote: SPTAppRemote, didDisconnectWithError error: Error?) {
         NSLog("🔥 App Remote disconnected: \(error?.localizedDescription ?? "no error")")
         isConnected = false
+        isSubscribedToPlayerState = false
 
         // Notify JS side about disconnection
         module?.sendEvent("onAppRemoteDisconnected", [
             "error": error?.localizedDescription
+        ])
+    }
+}
+
+// MARK: - SPTAppRemotePlayerStateDelegate
+
+extension ExpoSpotifyAppRemoteManager: SPTAppRemotePlayerStateDelegate {
+    public func playerStateDidChange(_ playerState: SPTAppRemotePlayerState) {
+        NSLog("🎵 Player state changed")
+
+        let trackInfo = playerState.track
+        let artistName = trackInfo.artist.name
+
+        // Notify JS side about player state change
+        module?.sendEvent("onPlayerStateChanged", [
+            "playerState": [
+                "isPaused": playerState.isPaused,
+                "track": [
+                    "name": trackInfo.name,
+                    "uri": trackInfo.uri,
+                    "artist": [
+                        "name": artistName
+                    ]
+                ]
+            ]
         ])
     }
 }

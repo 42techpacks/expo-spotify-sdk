@@ -11,6 +11,10 @@ import {
   AppRemoteConnectionFailureEvent,
   AppRemoteDisconnectedEvent,
   AppRemoteConnectedEvent,
+  PlayerState,
+  PlayerStateResult,
+  PlayerStateSubscriptionResult,
+  PlayerStateChangedEvent,
 } from "./ExpoSpotifySDK.types";
 import ExpoSpotifySDKModule from "./ExpoSpotifySDKModule";
 
@@ -76,6 +80,31 @@ function playAsync(): Promise<PlaybackResult> {
 function pauseAsync(): Promise<PlaybackResult> {
   return ExpoSpotifySDKModule.pauseAsync();
 }
+
+/**
+ * Gets the current player state
+ * @returns Promise that resolves with the current player state
+ */
+function getPlayerStateAsync(): Promise<PlayerStateResult> {
+  return ExpoSpotifySDKModule.getPlayerStateAsync();
+}
+
+/**
+ * Subscribes to player state changes
+ * @returns Promise that resolves with a success boolean
+ */
+function subscribeToPlayerStateAsync(): Promise<PlayerStateSubscriptionResult> {
+  return ExpoSpotifySDKModule.subscribeToPlayerStateAsync();
+}
+
+/**
+ * Unsubscribes from player state changes
+ * @returns Promise that resolves with a success boolean
+ */
+function unsubscribeFromPlayerStateAsync(): Promise<PlayerStateSubscriptionResult> {
+  return ExpoSpotifySDKModule.unsubscribeFromPlayerStateAsync();
+}
+
 // Event listeners
 const emitter = new EventEmitter(ExpoSpotifySDKModule);
 
@@ -96,6 +125,13 @@ function addAppRemoteDisconnectedListener(
 ): Subscription {
   return emitter.addListener("onAppRemoteDisconnected", listener);
 }
+
+function addPlayerStateChangedListener(
+  listener: (event: PlayerStateChangedEvent) => void,
+): Subscription {
+  return emitter.addListener("onPlayerStateChanged", listener);
+}
+
 const Authenticate = {
   authenticateAsync,
 };
@@ -110,6 +146,10 @@ const AppRemote = {
   addAppRemoteConnectedListener,
   addAppRemoteConnectionFailureListener,
   addAppRemoteDisconnectedListener,
+  getPlayerStateAsync,
+  subscribeToPlayerStateAsync,
+  unsubscribeFromPlayerStateAsync,
+  addPlayerStateChangedListener,
 };
 
 export { isAvailable, Authenticate, AppRemote };

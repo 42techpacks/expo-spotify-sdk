@@ -4,6 +4,8 @@ import { Alert, StyleSheet, Text, View, Button } from "react-native";
 
 import { useSpotifyAppRemote } from "./src/hooks/useSpotifyAppRemote";
 import { useSpotifyAuthentication } from "./src/hooks/useSpotifyAuthentication";
+import { PlayPauseButton } from "./src/components/PlayPauseButton";
+import { useSpotifyPlayerState } from "./src/hooks/useSpotifyPlayerState";
 
 export default function App() {
   const [authToken, setAuthToken] = useState("unknown");
@@ -11,11 +13,10 @@ export default function App() {
   const {
     isConnected,
     authorizeAndPlayURI,
-    playAsync,
-    pauseAsync,
     connectAppRemote,
     disconnectAppRemote,
   } = useSpotifyAppRemote();
+  const { playerState } = useSpotifyPlayerState();
 
   async function handleAuthenticatePress() {
     try {
@@ -83,52 +84,6 @@ export default function App() {
     }
   }
 
-  async function handlePlayPress() {
-    try {
-      if (!isConnected) {
-        Alert.alert(
-          "Not Connected",
-          "Please connect to Spotify first by using 'Authorize and Play URI'",
-        );
-        return;
-      }
-
-      const result = await playAsync();
-      console.log("Play result:", result);
-
-      if (!result.success) {
-        Alert.alert("Error", "Failed to start playback");
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert("Playback Error", error.message);
-      }
-    }
-  }
-
-  async function handlePausePress() {
-    try {
-      if (!isConnected) {
-        Alert.alert(
-          "Not Connected",
-          "Please connect to Spotify first by using 'Authorize and Play URI'",
-        );
-        return;
-      }
-
-      const result = await pauseAsync();
-      console.log("Pause result:", result);
-
-      if (!result.success) {
-        Alert.alert("Error", "Failed to pause playback");
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert("Playback Error", error.message);
-      }
-    }
-  }
-
   async function handleConnectPress() {
     try {
       const result = await connectAppRemote({
@@ -184,15 +139,18 @@ export default function App() {
           <Button title="Connect" onPress={handleConnectPress} />
           <Button title="Disconnect" onPress={handleDisconnectPress} />
         </View>
-        {/* {connectionError && (
-          <Text style={styles.error}>Error: {connectionError}</Text>
-        )} */}
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Playback Controls</Text>
-        <Button title="Play" onPress={handlePlayPress} />
-        <Button title="Pause" onPress={handlePausePress} />
+        <View style={styles.playerInfo}>
+          {playerState?.track && (
+            <Text style={styles.trackInfo}>
+              {playerState.track.name} - {playerState.track.artist.name}
+            </Text>
+          )}
+          <PlayPauseButton size={60} />
+        </View>
       </View>
     </View>
   );
@@ -227,6 +185,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 10,
+  },
+  playerInfo: {
+    alignItems: "center",
+    marginTop: 10,
+  },
+  trackInfo: {
+    fontSize: 16,
+    marginBottom: 15,
+    textAlign: "center",
   },
   error: {
     color: "red",
