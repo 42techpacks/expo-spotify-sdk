@@ -1,5 +1,11 @@
 import React from "react";
-import { StyleSheet, TouchableOpacity, View, Text, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import { useSpotifyPlayerState } from "../hooks/useSpotifyPlayerState";
 import { useSpotifyAppRemote } from "../hooks/useSpotifyAppRemote";
 
@@ -12,19 +18,29 @@ interface PlayPauseButtonProps {
 export function PlayPauseButton({
   size = 50,
   color = "#1DB954",
-  style
+  style,
 }: PlayPauseButtonProps) {
   const { isConnected } = useSpotifyAppRemote();
   const { playerState, isPlaying, togglePlayPause } = useSpotifyPlayerState();
   const [isLoading, setIsLoading] = React.useState(false);
 
   const handlePress = async () => {
+    if (!isConnected) {
+      // Don't even try to toggle if not connected
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await togglePlayPause();
+      const result = await togglePlayPause();
+      // If the toggle operation failed, we should still reset the loading state
+      if (!result.success) {
+        console.warn("Toggle playback operation failed");
+      }
     } catch (error) {
       console.error("Error toggling playback:", error);
     } finally {
+      // Ensure loading state is always reset
       setIsLoading(false);
     }
   };
@@ -35,25 +51,45 @@ export function PlayPauseButton({
 
   // Play icon is a triangle pointing right
   const renderPlayIcon = () => (
-    <View style={[styles.playIcon, { borderLeftWidth: iconSize, borderTopWidth: iconSize / 2, borderBottomWidth: iconSize / 2 }]} />
+    <View
+      style={[
+        styles.playIcon,
+        {
+          borderLeftWidth: iconSize,
+          borderTopWidth: iconSize / 2,
+          borderBottomWidth: iconSize / 2,
+        },
+      ]}
+    />
   );
 
   // Pause icon is two parallel rectangles
   const renderPauseIcon = () => (
     <View style={styles.pauseContainer}>
-      <View style={[styles.pauseBar, { width: iconSize / 3, height: iconSize }]} />
-      <View style={[styles.pauseBar, { width: iconSize / 3, height: iconSize }]} />
+      <View
+        style={[styles.pauseBar, { width: iconSize / 3, height: iconSize }]}
+      />
+      <View
+        style={[styles.pauseBar, { width: iconSize / 3, height: iconSize }]}
+      />
     </View>
   );
 
   return (
     <TouchableOpacity
-      style={[styles.button, buttonSize, { backgroundColor: color }, style]}
+      style={[
+        styles.button,
+        buttonSize,
+        { backgroundColor: color },
+        style,
+        isLoading && styles.loading,
+        !isConnected && styles.disabled,
+      ]}
       onPress={handlePress}
-      disabled={!isConnected || isLoading}
+      disabled={isLoading || !isConnected}
     >
       {isLoading ? (
-        <ActivityIndicator color="#FFFFFF" />
+        <ActivityIndicator color="#FFFFFF" size="small" />
       ) : isPlaying ? (
         renderPauseIcon()
       ) : (
@@ -65,14 +101,21 @@ export function PlayPauseButton({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 25,
+    borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 3,
+    backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  loading: {
+    opacity: 0.7,
+  },
+  disabled: {
+    opacity: 0.5,
   },
   playIcon: {
     width: 0,

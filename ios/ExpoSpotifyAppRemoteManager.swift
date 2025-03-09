@@ -222,6 +222,9 @@ extension ExpoSpotifyAppRemoteManager: SPTAppRemoteDelegate {
         NSLog("🔥 App Remote connection established")
         isConnected = true
         connectionPromiseSeal?.fulfill(true)
+        if module == nil {
+            NSLog("😖 Module is nil during connection establishment")
+        }
 
         // Notify JS side about connection status change
         module?.sendEvent("onAppRemoteConnected", [
@@ -237,6 +240,10 @@ extension ExpoSpotifyAppRemoteManager: SPTAppRemoteDelegate {
             connectionPromiseSeal?.reject(error)
         } else {
             connectionPromiseSeal?.reject(AppRemoteError.connectionFailed)
+        }
+
+        if module == nil {
+            NSLog("😖 Module is nil during connection failure")
         }
 
         // Notify JS side about connection failure
@@ -266,18 +273,48 @@ extension ExpoSpotifyAppRemoteManager: SPTAppRemotePlayerStateDelegate {
         let trackInfo = playerState.track
         let artistName = trackInfo.artist.name
 
-        // Notify JS side about player state change
-        module?.sendEvent("onPlayerStateChanged", [
-            "playerState": [
-                "isPaused": playerState.isPaused,
-                "track": [
-                    "name": trackInfo.name,
-                    "uri": trackInfo.uri,
-                    "artist": [
-                        "name": artistName
-                    ]
+        // Create the player state event data
+        var playerStateData: [String: Any] = [
+            "isPaused": playerState.isPaused,
+            "track": [
+                "name": trackInfo.name,
+                "uri": trackInfo.uri,
+                "artist": [
+                    "name": artistName
                 ]
             ]
-        ])
+        ]
+
+        // Fetch the track image
+        appRemote?.imageAPI?.fetchImage(forItem: trackInfo, with: CGSize(width: 640, height: 640), callback: { (image, error) in
+            if let error = error {
+                NSLog("Failed to fetch track image: \(error.localizedDescription)")
+                // Send the player state event without the image
+                self.module?.sendEvent("onPlayerStateChanged", [
+                    "playerState": playerStateData
+                ])
+                return
+            }
+
+            if let image = image as? UIImage, let imageData = image.jpegData(compressionQuality: 0.8) {
+                let base64String = imageData.base64EncodedString()
+                let imageUri = "data:image/jpeg;base64,\(base64String)"
+
+                // Update the player state with the image URI
+                if var trackData = playerStateData["track"] as? [String: Any] {
+                    trackData["imageUri"] = imageUri
+                    playerStateData["track"] = trackData
+                }
+            }
+
+            if self.module == nil {
+                NSLog("😖 Module is nil during player state change")
+            }
+
+            // Send the player state event with the image
+            self.module?.sendEvent("onPlayerStateChanged", [
+                "playerState": playerStateData
+            ])
+        })
     }
 }

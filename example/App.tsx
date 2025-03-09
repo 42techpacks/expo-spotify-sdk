@@ -1,10 +1,18 @@
 import { isAvailable } from "expo-spotify-sdk";
-import { useState } from "react";
-import { Alert, StyleSheet, Text, View, Button, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 
+import { PlayPauseButton } from "./src/components/PlayPauseButton";
 import { useSpotifyAppRemote } from "./src/hooks/useSpotifyAppRemote";
 import { useSpotifyAuthentication } from "./src/hooks/useSpotifyAuthentication";
-import { PlayPauseButton } from "./src/components/PlayPauseButton";
 import { useSpotifyPlayerState } from "./src/hooks/useSpotifyPlayerState";
 
 export default function App() {
@@ -121,7 +129,10 @@ export default function App() {
   async function handleSkipToNextPress() {
     try {
       if (!isConnected) {
-        Alert.alert("Not Connected", "Please connect to Spotify App Remote first");
+        Alert.alert(
+          "Not Connected",
+          "Please connect to Spotify App Remote first",
+        );
         return;
       }
 
@@ -141,7 +152,10 @@ export default function App() {
   async function handleSkipToPreviousPress() {
     try {
       if (!isConnected) {
-        Alert.alert("Not Connected", "Please connect to Spotify App Remote first");
+        Alert.alert(
+          "Not Connected",
+          "Please connect to Spotify App Remote first",
+        );
         return;
       }
 
@@ -187,9 +201,18 @@ export default function App() {
         <Text style={styles.sectionTitle}>Playback Controls</Text>
         <View style={styles.playerInfo}>
           {playerState?.track && (
-            <Text style={styles.trackInfo}>
-              {playerState.track.name} - {playerState.track.artist.name}
-            </Text>
+            <>
+              <Text style={styles.trackInfo}>
+                {playerState.track.name} - {playerState.track.artist.name}
+              </Text>
+              {playerState.track.imageUri && (
+                <Image
+                  source={{ uri: playerState.track.imageUri }}
+                  style={styles.albumArt}
+                  resizeMode="contain"
+                />
+              )}
+            </>
           )}
           <View style={styles.playbackControls}>
             <TouchableOpacity
@@ -272,5 +295,11 @@ const styles = StyleSheet.create({
   },
   skipButtonText: {
     fontSize: 24,
+  },
+  albumArt: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+    borderRadius: 8,
   },
 });

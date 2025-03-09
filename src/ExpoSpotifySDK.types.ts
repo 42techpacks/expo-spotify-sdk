@@ -64,6 +64,7 @@ export interface PlayerState {
   track?: {
     name: string;
     uri: string;
+    imageUri?: string;
     artist: {
       name: string;
     };
