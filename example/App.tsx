@@ -14,7 +14,7 @@ export default function App() {
     playAsync,
     pauseAsync,
     connectAppRemote,
-    disconnectAppRemote
+    disconnectAppRemote,
   } = useSpotifyAppRemote();
 
   async function handleAuthenticatePress() {
@@ -85,13 +85,13 @@ export default function App() {
 
   async function handlePlayPress() {
     try {
-      // if (!isConnected) {
-      //   Alert.alert(
-      //     "Not Connected",
-      //     "Please connect to Spotify first by using 'Authorize and Play URI'",
-      //   );
-      //   return;
-      // }
+      if (!isConnected) {
+        Alert.alert(
+          "Not Connected",
+          "Please connect to Spotify first by using 'Authorize and Play URI'",
+        );
+        return;
+      }
 
       const result = await playAsync();
       console.log("Play result:", result);
@@ -108,13 +108,13 @@ export default function App() {
 
   async function handlePausePress() {
     try {
-      // if (!isConnected) {
-      //   Alert.alert(
-      //     "Not Connected",
-      //     "Please connect to Spotify first by using 'Authorize and Play URI'",
-      //   );
-      //   return;
-      // }
+      if (!isConnected) {
+        Alert.alert(
+          "Not Connected",
+          "Please connect to Spotify first by using 'Authorize and Play URI'",
+        );
+        return;
+      }
 
       const result = await pauseAsync();
       console.log("Pause result:", result);

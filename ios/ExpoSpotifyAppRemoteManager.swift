@@ -137,9 +137,9 @@ extension ExpoSpotifyAppRemoteManager: SPTAppRemoteDelegate {
         connectionPromiseSeal?.fulfill(true)
 
         // Notify JS side about connection status change
-        // module?.sendEvent("onAppRemoteConnected", [
-        //     "connected": true
-        // ])
+        module?.sendEvent("onAppRemoteConnected", [
+            "connected": true
+        ])
     }
 
     public func appRemote(_ appRemote: SPTAppRemote, didFailConnectionAttemptWithError error: Error?) {
@@ -153,9 +153,9 @@ extension ExpoSpotifyAppRemoteManager: SPTAppRemoteDelegate {
         }
 
         // Notify JS side about connection failure
-        // module?.sendEvent("onAppRemoteConnectionFailure", [
-        //     "error": error?.localizedDescription ?? "Connection failed"
-        // ])
+        module?.sendEvent("onAppRemoteConnectionFailure", [
+            "error": error?.localizedDescription ?? "Connection failed"
+        ])
     }
 
     public func appRemote(_ appRemote: SPTAppRemote, didDisconnectWithError error: Error?) {
@@ -163,8 +163,8 @@ extension ExpoSpotifyAppRemoteManager: SPTAppRemoteDelegate {
         isConnected = false
 
         // Notify JS side about disconnection
-        // module?.sendEvent("onAppRemoteDisconnected", [
-        //     "error": error?.localizedDescription
-        // ])
+        module?.sendEvent("onAppRemoteDisconnected", [
+            "error": error?.localizedDescription
+        ])
     }
 }

@@ -1,6 +1,10 @@
 import ExpoModulesCore
 import SpotifyiOS
 
+let APP_REMOTE_CONNECTED_EVENT_NAME = "onAppRemoteConnected"
+let APP_REMOTE_DISCONNECTED_EVENT_NAME = "onAppRemoteDisconnected"
+let APP_REMOTE_CONNECTION_FAILED_EVENT_NAME = "onAppRemoteConnectionFailure"
+
 public class ExpoSpotifySDKModule: Module {
 
     public func definition() -> ModuleDefinition {
@@ -8,7 +12,18 @@ public class ExpoSpotifySDKModule: Module {
         let spotifySession = ExpoSpotifySessionManager.shared
         let spotifyAppRemote = ExpoSpotifyAppRemoteManager.shared
 
+        OnCreate {
+            NSLog("ExpoSpotifySDKModule created")
+            spotifyAppRemote.module = self
+        }
+
+        OnDestroy {
+            NSLog("ExpoSpotifySDKModule destroyed")
+            spotifyAppRemote.module = nil
+        }
+
         Name("ExpoSpotifySDK")
+        Events(APP_REMOTE_CONNECTED_EVENT_NAME, APP_REMOTE_DISCONNECTED_EVENT_NAME, APP_REMOTE_CONNECTION_FAILED_EVENT_NAME)
 
         Function("isAvailable") {
             return spotifySession.spotifyAppInstalled()

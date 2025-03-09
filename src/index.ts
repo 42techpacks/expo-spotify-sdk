@@ -1,3 +1,5 @@
+import { EventEmitter, Subscription } from "expo-modules-core";
+
 import {
   SpotifyConfig,
   SpotifySession,
@@ -6,7 +8,9 @@ import {
   AppRemoteConnectionConfig,
   AppRemoteConnectionResult,
   AppRemoteDisconnectionResult,
-
+  AppRemoteConnectionFailureEvent,
+  AppRemoteDisconnectedEvent,
+  AppRemoteConnectedEvent,
 } from "./ExpoSpotifySDK.types";
 import ExpoSpotifySDKModule from "./ExpoSpotifySDKModule";
 
@@ -72,7 +76,26 @@ function playAsync(): Promise<PlaybackResult> {
 function pauseAsync(): Promise<PlaybackResult> {
   return ExpoSpotifySDKModule.pauseAsync();
 }
+// Event listeners
+const emitter = new EventEmitter(ExpoSpotifySDKModule);
 
+function addAppRemoteConnectedListener(
+  listener: (event: AppRemoteConnectedEvent) => void,
+): Subscription {
+  return emitter.addListener("onAppRemoteConnected", listener);
+}
+
+function addAppRemoteConnectionFailureListener(
+  listener: (event: AppRemoteConnectionFailureEvent) => void,
+): Subscription {
+  return emitter.addListener("onAppRemoteConnectionFailure", listener);
+}
+
+function addAppRemoteDisconnectedListener(
+  listener: (event: AppRemoteDisconnectedEvent) => void,
+): Subscription {
+  return emitter.addListener("onAppRemoteDisconnected", listener);
+}
 const Authenticate = {
   authenticateAsync,
 };
@@ -84,6 +107,9 @@ const AppRemote = {
   pauseAsync,
   connectAppRemoteAsync,
   disconnectAppRemoteAsync,
+  addAppRemoteConnectedListener,
+  addAppRemoteConnectionFailureListener,
+  addAppRemoteDisconnectedListener,
 };
 
 export { isAvailable, Authenticate, AppRemote };

@@ -54,3 +54,23 @@ export interface AppRemoteConnectionResult {
 export interface AppRemoteDisconnectionResult {
   disconnected: boolean;
 }
+
+export type ExpoSpotifySDKModuleEvents = {
+  onAppRemoteConnected: (event: AppRemoteConnectedEvent) => void;
+  onAppRemoteDisconnected: (event: AppRemoteDisconnectedEvent) => void;
+  onAppRemoteConnectionFailure: (
+    event: AppRemoteConnectionFailureEvent,
+  ) => void;
+};
+
+export type AppRemoteConnectedEvent = {
+  connected: boolean;
+};
+
+export type AppRemoteDisconnectedEvent = {
+  error: string;
+};
+
+export type AppRemoteConnectionFailureEvent = {
+  error: string;
+};
