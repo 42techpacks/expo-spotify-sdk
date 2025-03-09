@@ -2,11 +2,13 @@ import { isAvailable } from "expo-spotify-sdk";
 import { useState } from "react";
 import { Alert, StyleSheet, Text, View, Button } from "react-native";
 
+import { useSpotifyAppRemote } from "./src/hooks/useSpotifyAppRemote";
 import { useSpotifyAuthentication } from "./src/hooks/useSpotifyAuthentication";
 
 export default function App() {
   const [authToken, setAuthToken] = useState("unknown");
   const { authenticateAsync } = useSpotifyAuthentication();
+  const { isConnected, authorizeAndPlayURI } = useSpotifyAppRemote();
 
   async function handleAuthenticatePress() {
     try {
@@ -42,6 +44,37 @@ export default function App() {
     }
   }
 
+  async function handleAuthorizeAndPlayURIPress() {
+    try {
+      // Using a sample Spotify URI - you can replace this with any valid URI
+      const uri = "spotify:album:1htHMnxonxmyHdKE2uDFMR";
+
+      if (!isConnected) {
+        // If not connected, use authorizeAndPlayURI which will handle authorization
+        const result = await authorizeAndPlayURI(uri, { asRadio: false });
+        console.log("Authorize and play URI result:", result);
+
+        if (!result.success && !isAvailable()) {
+          // Handle case when Spotify app is not installed
+          Alert.alert(
+            "Spotify Not Installed",
+            "Please install the Spotify app from the App Store to continue.",
+          );
+        }
+      } else {
+        // If already connected, we could handle playback directly
+        // For now, we'll just show a message
+        Alert.alert(
+          "Already Connected",
+          "App Remote is already connected. Direct playback functionality not implemented in this example.",
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Playback Error", error.message);
+      }
+    }
+  }
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Spotify SDK Example</Text>
@@ -56,18 +89,8 @@ export default function App() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>App Remote</Text>
         <Button
-          title="Connect App Remote"
-          // onPress={handleConnectAppRemotePress}
-          // disabled={isConnected}
-        />
-        <Button
-          title="Disconnect App Remote"
-          // onPress={handleDisconnectAppRemotePress}
-          // disabled={!isConnected}
-        />
-        <Button
           title="Authorize and Play URI"
-          // onPress={handleAuthorizeAndPlayURIPress}
+          onPress={handleAuthorizeAndPlayURIPress}
         />
         <Text>Spotify app is installed: {isAvailable() ? "yes" : "no"}</Text>
         {/* <Text>App Remote connected: {isConnected ? "yes" : "no"}</Text> */}

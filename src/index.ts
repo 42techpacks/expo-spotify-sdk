@@ -1,4 +1,8 @@
-import { SpotifyConfig, SpotifySession } from "./ExpoSpotifySDK.types";
+import {
+  SpotifyConfig,
+  SpotifySession,
+  AuthorizeAndPlayURIResult,
+} from "./ExpoSpotifySDK.types";
 import ExpoSpotifySDKModule from "./ExpoSpotifySDKModule";
 
 function isAvailable(): boolean {
@@ -13,8 +17,34 @@ function authenticateAsync(config: SpotifyConfig): Promise<SpotifySession> {
   return ExpoSpotifySDKModule.authenticateAsync(config);
 }
 
+/**
+ * Authorizes with Spotify and immediately starts playback of the provided URI
+ * @param uri The Spotify URI to play
+ * @returns Promise that resolves with a success boolean
+ */
+function authorizeAndPlayURIAsync(
+  uri: string,
+): Promise<AuthorizeAndPlayURIResult> {
+  if (!uri) {
+    throw new Error("uri is required");
+  }
+
+  return ExpoSpotifySDKModule.authorizeAndPlayURIAsync({
+    uri,
+  });
+}
+
+function isAppRemoteConnected(): boolean {
+  return ExpoSpotifySDKModule.isAppRemoteConnected();
+}
+
 const Authenticate = {
   authenticateAsync,
 };
 
-export { isAvailable, Authenticate };
+const AppRemote = {
+  authorizeAndPlayURIAsync,
+  isAppRemoteConnected,
+};
+
+export { isAvailable, Authenticate, AppRemote };

@@ -34,3 +34,7 @@ export type SpotifyScope =
   | "user-library-read"
   | "user-read-email"
   | "user-read-private";
+
+export interface AuthorizeAndPlayURIResult {
+  success: boolean;
+}
