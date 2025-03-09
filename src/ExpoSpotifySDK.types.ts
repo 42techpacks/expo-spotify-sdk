@@ -34,3 +34,72 @@ export type SpotifyScope =
   | "user-library-read"
   | "user-read-email"
   | "user-read-private";
+
+export interface AuthorizeAndPlayURIResult {
+  success: boolean;
+}
+
+export interface PlaybackResult {
+  success: boolean;
+}
+
+export interface SkipTrackResult {
+  success: boolean;
+}
+
+export interface AppRemoteConnectionConfig {
+  accessToken: string;
+}
+
+export interface AppRemoteConnectionResult {
+  connected: boolean;
+}
+
+export interface AppRemoteDisconnectionResult {
+  disconnected: boolean;
+}
+
+export interface PlayerState {
+  isPaused: boolean;
+  track?: {
+    name: string;
+    uri: string;
+    imageUri?: string;
+    artist: {
+      name: string;
+    };
+  };
+}
+
+export interface PlayerStateResult {
+  playerState: PlayerState;
+}
+
+export interface PlayerStateSubscriptionResult {
+  success: boolean;
+}
+
+export type ExpoSpotifySDKModuleEvents = {
+  onAppRemoteConnected: (event: AppRemoteConnectedEvent) => void;
+  onAppRemoteDisconnected: (event: AppRemoteDisconnectedEvent) => void;
+  onAppRemoteConnectionFailure: (
+    event: AppRemoteConnectionFailureEvent,
+  ) => void;
+  onPlayerStateChanged: (event: PlayerStateChangedEvent) => void;
+};
+
+export type AppRemoteConnectedEvent = {
+  connected: boolean;
+};
+
+export type AppRemoteDisconnectedEvent = {
+  error: string;
+};
+
+export type AppRemoteConnectionFailureEvent = {
+  error: string;
+};
+
+export type PlayerStateChangedEvent = {
+  playerState: PlayerState;
+};
