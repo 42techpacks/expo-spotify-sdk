@@ -212,6 +212,25 @@ final class ExpoSpotifyAppRemoteManager: NSObject {
             })
         }
     }
+
+    func playTrack(uri: String) -> PromiseKit.Promise<Bool> {
+        return Promise { seal in
+            guard let appRemote = self.appRemote, appRemote.isConnected else {
+                seal.reject(AppRemoteError.notInitialized)
+                return
+            }
+
+            appRemote.playerAPI?.play(uri, callback: { (_, error) in
+                if let error = error {
+                    NSLog("Failed to play track: \(error.localizedDescription)")
+                    seal.reject(error)
+                    return
+                }
+
+                seal.fulfill(true)
+            })
+        }
+    }
 }
 
 // MARK: - SPTAppRemoteDelegate

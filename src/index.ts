@@ -40,10 +40,6 @@ function authenticateAsync(config: SpotifyConfig): Promise<SpotifySession> {
 function authorizeAndPlayURIAsync(
   uri: string,
 ): Promise<AuthorizeAndPlayURIResult> {
-  if (!uri) {
-    throw new Error("uri is required");
-  }
-
   return ExpoSpotifySDKModule.authorizeAndPlayURIAsync({
     uri,
   });
@@ -73,6 +69,15 @@ function disconnectAppRemoteAsync(): Promise<AppRemoteDisconnectionResult> {
  */
 function playAsync(): Promise<PlaybackResult> {
   return ExpoSpotifySDKModule.playAsync();
+}
+
+/**
+ * Plays a specific track by URI
+ * @param uri The Spotify URI of the track to play
+ * @returns Promise that resolves with a success boolean
+ */
+function playTrackAsync(uri: string): Promise<PlaybackResult> {
+  return ExpoSpotifySDKModule.playTrackAsync({ uri });
 }
 
 /**
@@ -171,6 +176,7 @@ const AppRemote = {
   authorizeAndPlayURIAsync,
   isAppRemoteConnected,
   playAsync,
+  playTrackAsync,
   pauseAsync,
   skipToNextAsync,
   skipToPreviousAsync,
