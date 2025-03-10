@@ -3,6 +3,7 @@ import SpotifyiOS
 
 extension ExpoSpotifySessionManager: SPTSessionManagerDelegate {
     public func sessionManager(manager _: SPTSessionManager, didInitiate session: SPTSession) {
+        NSLog("🔥 Session Manager Initiated")
         authPromiseSeal?.fulfill(session)
     }
     

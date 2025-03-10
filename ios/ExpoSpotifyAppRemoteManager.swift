@@ -92,7 +92,6 @@ final class ExpoSpotifyAppRemoteManager: NSObject {
             }
 
             self.accessToken = accessToken
-            NSLog("accessToken: \(self.accessToken)")
 
             if accessToken == nil {
                 seal.reject(AppRemoteError.accessTokenMissing)
