@@ -11,7 +11,7 @@ More to come...
 ## Installation
 
 ```sh
-npx expo install @wwdrew/expo-spotify-sdk
+npx expo install @42techpacks/expo-spotify-sdk
 ```
 
 ## Configuration
@@ -21,7 +21,7 @@ Include the `expo-spotify-sdk` plugin in your `app.json/app.config.js` file with
 ```javascript
   ...
   "plugins": [
-    ["@wwdrew/expo-spotify-sdk", {
+    ["@42techpacks/expo-spotify-sdk", {
       "clientID": "<your-spotify-client-id>",
       "scheme": "expo-spotify-sdk-example",
       "host": "authenticate"
