@@ -1,6 +1,6 @@
 {
   "name": "@42techpacks/expo-spotify-sdk",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Expo Module for native Spotify SDK",
   "main": "build/index.js",
   "types": "build/index.d.ts",

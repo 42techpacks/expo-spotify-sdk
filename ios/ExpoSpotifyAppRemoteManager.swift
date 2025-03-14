@@ -300,7 +300,9 @@ extension ExpoSpotifyAppRemoteManager: SPTAppRemotePlayerStateDelegate {
                 "artist": [
                     "name": artistName
                 ]
-            ]
+            ],
+            "contextTitle": playerState.contextTitle,
+            "contextURI": playerState.contextURI
         ]
 
         // Fetch the track image

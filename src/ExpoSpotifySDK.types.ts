@@ -77,6 +77,8 @@ export interface PlayerState {
       name: string;
     };
   };
+  contextTitle: string;
+  contextURI: string;
 }
 
 export interface PlayerStateResult {
